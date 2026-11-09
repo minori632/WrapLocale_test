@@ -6,7 +6,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        platform: [x64, Win32]
+        platform: [x64, x86]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -14,8 +14,15 @@ jobs:
 
       - uses: microsoft/setup-msbuild@v2
 
+      - name: Check submodules
+        shell: pwsh
+        run: |
+          Get-Content .gitmodules
+          git submodule status
+          Get-ChildItem -Recurse -Filter MinHook.h | Select-Object FullName
+
       - name: Build
-        run: msbuild WrapLocale.sln /m /p:Configuration=Release /p:Platform=${{ matrix.platform }}
+        run: msbuild WrapLocale.sln /m /v:n /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:UseStructuredOutput=false
 
       - uses: actions/upload-artifact@v4
         with:
